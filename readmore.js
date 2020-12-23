@@ -75,7 +75,7 @@
   function setBoxHeights(element) {
     var el = element.clone().css({
           height: 'auto',
-          width: element.width(),
+          width: element.innerWidth(),
           maxHeight: 'none',
           overflow: 'hidden'
         }).insertAfter(element),
@@ -99,7 +99,30 @@
     });
   }
 
+  var initBoxes = debounce(function() {
+    $('body').data('innerWidth', $(window).width());
+
+    $('[data-readmore]').each(function() {
+      var current = $(this),
+        isExpanded = (current.attr('aria-expanded') === 'true');
+
+      setBoxHeights(current);
+
+      current.css({
+        height: current.data( (isExpanded ? 'expandedHeight' : 'collapsedHeight') )
+      });
+    });
+  }, 100);
+
   var resizeBoxes = debounce(function() {
+    var innerWidth = $('body').data('innerWidth');
+
+    if (innerWidth != $(window).width()) {
+      $('body').data('innerWidth', $(window).width());
+    } else {
+      return false;
+    }
+
     $('[data-readmore]').each(function() {
       var current = $(this),
           isExpanded = (current.attr('aria-expanded') === 'true');
@@ -162,11 +185,11 @@
     // IE8 chokes on `window.addEventListener`, so need to test for support.
     if (window.addEventListener) {
       // Need to resize boxes when the page has fully loaded.
-      window.addEventListener('load', resizeBoxes);
+      window.addEventListener('load', initBoxes);
       window.addEventListener('resize', resizeBoxes);
     }
     else {
-      window.attachEvent('load', resizeBoxes);
+      window.attachEvent('load', initBoxes);
       window.attachEvent('resize', resizeBoxes);
     }
   }
@@ -217,6 +240,10 @@
         if (! this.options.startOpen) {
           current.css({
             height: collapsedHeight
+          });
+        } else {
+          current.css({
+            height: current.height()
           });
         }
 
@@ -312,7 +339,7 @@
 
   $.fn.readmore = function(options) {
     var args = arguments,
-        selector = this.selector;
+        selector = this.selector || '';
 
     options = options || {};
 
