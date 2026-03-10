@@ -186,7 +186,7 @@
 
       var collapsedHeight = current.data('collapsedHeight'),
           heightMargin = current.data('heightMargin');
-      var currentHeight = this.options.useVisibleHeight ? current.outerHeight(true) : current.scrollHeight
+      var currentHeight = this.options.useVisibleHeight ? current.outerHeight(true) : current.prop('scrollHeight')
 
       if (currentHeight <= collapsedHeight + heightMargin) {
         // The block is shorter than the limit, so there's no need to truncate it.
